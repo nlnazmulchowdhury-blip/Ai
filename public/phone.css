@@ -1,0 +1,438 @@
+/* ফোনের খোলস — PC ড্যাশবোর্ডের গ্লাস/জারভিস থিমই এখানে বসে, শুধু লেআউট মোবাইলের।
+   রং/ফন্ট/গ্লাস সব /styles.css + /glass.css-এর টোকেন থেকে আসে। */
+
+.p-app {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ---------- উপরের কর্নার ক্লাস্টার ---------- */
+.p-top {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: calc(env(safe-area-inset-top) + 8px) 12px 8px;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(10, 16, 22, 0.92), rgba(6, 10, 14, 0.6));
+  backdrop-filter: blur(14px);
+}
+
+.p-orb {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border-radius: 50%;
+  position: relative;
+  background: radial-gradient(circle at 34% 30%, #cfe3ff, #4d7fd6 46%, #0a1526 100%);
+  box-shadow: 0 0 0 1px rgba(168, 200, 255, 0.28), 0 0 14px rgba(120, 170, 255, 0.28);
+  animation: p-breathe 3.6s ease-in-out infinite;
+}
+
+.p-orb::after {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  border: 1px dashed rgba(168, 200, 255, 0.35);
+  border-top-color: transparent;
+  border-bottom-color: transparent;
+  animation: p-spin 7s linear infinite;
+}
+
+.p-orb.hot {
+  animation-duration: 1.1s;
+  box-shadow: 0 0 0 1px rgba(190, 215, 255, 0.5), 0 0 22px rgba(140, 190, 255, 0.55);
+}
+
+@keyframes p-breathe {
+  0%, 100% { transform: scale(0.94); opacity: 0.85; }
+  50% { transform: scale(1.05); opacity: 1; }
+}
+
+@keyframes p-spin {
+  to { transform: rotate(360deg); }
+}
+
+.p-brand {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.p-brand small {
+  display: block;
+  font-family: var(--sans);
+  font-size: 9.5px;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin-top: 2px;
+  max-width: 46vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.p-cluster {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.p-pill {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--line-2);
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.p-pill.on {
+  color: var(--cyan);
+  border-color: rgba(168, 200, 255, 0.4);
+  background: rgba(168, 200, 255, 0.07);
+}
+
+.p-dot {
+  width: 8px;
+  height: 8px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--dim);
+}
+
+.p-dot.on {
+  background: var(--green);
+  box-shadow: 0 0 9px rgba(74, 222, 128, 0.65);
+}
+
+.p-dot.bad {
+  background: var(--red);
+}
+
+/* ---------- ট্যাব বডি ---------- */
+.p-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  position: relative;
+}
+
+.p-pane {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  padding: 12px 12px 8px;
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  scrollbar-width: none;
+}
+
+.p-pane::-webkit-scrollbar { width: 0; height: 0; }
+.p-pane.active { display: flex; }
+
+.p-pane > * {
+  animation: p-rise 0.34s cubic-bezier(0.22, 1.2, 0.36, 1) both;
+}
+
+@keyframes p-rise {
+  from { opacity: 0; transform: translateY(9px) scale(0.985); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ---------- নিচের ট্যাব বার ---------- */
+.p-tabs {
+  flex: none;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 2px;
+  padding: 4px 6px calc(env(safe-area-inset-bottom) + 4px);
+  border-top: 1px solid var(--line);
+  background: rgba(7, 10, 13, 0.94);
+  backdrop-filter: blur(12px);
+}
+
+.p-tab {
+  border: 0;
+  background: none;
+  color: var(--dim);
+  padding: 7px 2px 5px;
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  font-family: var(--sans);
+  font-size: 9.5px;
+  letter-spacing: 0.02em;
+  border-radius: 10px;
+  transition: color 0.18s ease, background 0.18s ease;
+}
+
+.p-tab svg { width: 19px; height: 19px; }
+.p-tab.active { color: var(--cyan); background: rgba(168, 200, 255, 0.07); }
+.p-tab:active { transform: scale(0.94); }
+
+/* ---------- ইনপুট সারি ---------- */
+.p-input {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 10px;
+  border-top: 1px solid var(--line);
+  background: rgba(6, 9, 12, 0.96);
+}
+
+.p-input input {
+  flex: 1 1 auto;
+  min-width: 0;
+  background: var(--panel-2);
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 15px;
+  padding: 11px 15px;
+}
+
+.p-input input:focus { outline: none; border-color: rgba(168, 200, 255, 0.45); }
+
+.p-round {
+  width: 42px;
+  height: 42px;
+  flex: none;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(168, 200, 255, 0.09);
+  color: var(--cyan);
+  display: grid;
+  place-items: center;
+}
+
+.p-round svg { width: 19px; height: 19px; }
+
+.p-round.mic {
+  width: 46px;
+  height: 46px;
+  background: linear-gradient(180deg, #6f9fe8, #2f5fa8);
+  color: #04101c;
+  box-shadow: 0 0 16px rgba(110, 160, 240, 0.34);
+}
+
+.p-round.mic.live {
+  animation: p-pulse 0.9s ease-in-out infinite;
+}
+
+@keyframes p-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.09); }
+}
+
+/* ---------- কার্ড ও সারি ---------- */
+.p-card {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.012));
+  padding: 11px 12px;
+}
+
+.p-card h3 {
+  margin: 0 0 6px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cyan);
+  font-weight: 500;
+}
+
+.p-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.045);
+  font-size: 13px;
+  color: var(--text);
+}
+
+.p-row:first-of-type { border-top: 0; }
+.p-row .grow { flex: 1 1 auto; min-width: 0; }
+.p-row .t { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.p-row .s { display: block; font-size: 10.5px; color: var(--muted); margin-top: 2px; }
+.p-row .tag { font-family: var(--mono); font-size: 9px; color: var(--dim); flex: none; }
+
+.p-btn {
+  flex: none;
+  border: 1px solid var(--line-2);
+  background: rgba(168, 200, 255, 0.05);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 6px 11px;
+  font-size: 11.5px;
+  font-family: var(--sans);
+}
+
+.p-btn.on {
+  color: var(--cyan);
+  border-color: rgba(168, 200, 255, 0.45);
+  background: rgba(168, 200, 255, 0.12);
+}
+
+.p-btn:active { transform: scale(0.95); }
+
+.p-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+}
+
+/* ---------- স্ক্রিন ট্যাব ---------- */
+.p-shot {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--panel-2);
+  min-height: 180px;
+}
+
+.p-shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.p-shot .stamp {
+  position: absolute;
+  left: 8px;
+  bottom: 7px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: var(--cyan);
+  background: rgba(4, 6, 7, 0.7);
+  padding: 3px 7px;
+  border-radius: 999px;
+}
+
+.p-shot .spin {
+  position: absolute;
+  inset: 0;
+  display: none;
+  place-items: center;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.p-shot.busy .spin { display: grid; }
+
+/* ---------- শিট (ক্লিক-অনলি) ---------- */
+.p-scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 4, 6, 0.62);
+  backdrop-filter: blur(3px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease;
+  z-index: 40;
+}
+
+.p-scrim.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.p-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 41;
+  transform: translateY(102%);
+  transition: transform 0.34s cubic-bezier(0.22, 1.15, 0.32, 1);
+  background: linear-gradient(180deg, rgba(13, 19, 26, 0.99), rgba(7, 10, 13, 0.99));
+  border-top: 1px solid rgba(168, 200, 255, 0.22);
+  border-radius: 20px 20px 0 0;
+  padding: 14px 14px calc(env(safe-area-inset-bottom) + 16px);
+  max-height: 76dvh;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.p-sheet::-webkit-scrollbar { width: 0; }
+.p-sheet.show { transform: none; }
+
+.p-sheet .grab {
+  width: 34px;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--line-2);
+  margin: 0 auto 12px;
+}
+
+.p-sheet .opt {
+  width: 100%;
+  text-align: left;
+  border: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: none;
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  padding: 13px 4px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.p-sheet .opt:last-child { border-bottom: 0; }
+.p-sheet .opt .k { margin-left: auto; font-family: var(--mono); font-size: 10px; color: var(--muted); }
+.p-sheet .opt.on .k { color: var(--cyan); }
+.p-sheet .opt.danger { color: #f0b4b4; }
+
+/* ---------- টোস্ট ---------- */
+.p-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom) + 96px);
+  transform: translate(-50%, 14px);
+  z-index: 60;
+  background: rgba(12, 18, 24, 0.96);
+  border: 1px solid rgba(168, 200, 255, 0.3);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 9px 16px;
+  font-size: 12.5px;
+  max-width: 88vw;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.28s cubic-bezier(0.22, 1.2, 0.36, 1);
+}
+
+.p-toast.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.p-hint {
+  font-size: 11.5px;
+  color: var(--amber);
+  line-height: 1.5;
+  flex: none;
+  padding: 0 2px;
+}
+
+/* চেটের ফ্ল্যাট চেহারা (মোবাইলে কোণ ঠিক করা) */
+.p-chat { display: flex; flex-direction: column; gap: 6px; }
+.p-chat .msg .bubble { font-size: 14px; }
+.p-chat .quick-chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.p-chat .quick-chips::-webkit-scrollbar { height: 0; }

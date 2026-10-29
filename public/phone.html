@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="bn">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#040607" />
+    <title>ফোন · PC Agent</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/glass.css" />
+    <link rel="stylesheet" href="/phone.css" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23070a0c'/%3E%3Ccircle cx='32' cy='32' r='17' fill='none' stroke='%23a8c8ff' stroke-width='2' stroke-dasharray='80 27'/%3E%3Ccircle cx='32' cy='32' r='3' fill='%23a8c8ff'/%3E%3C/svg%3E" />
+  </head>
+  <body>
+    <div class="p-app">
+      <header class="p-top">
+        <div class="p-orb" id="orb"></div>
+        <div class="p-brand">
+          PC<span style="color: var(--cyan)">·</span>AGENT
+          <small id="devline">সংযোগ হচ্ছে…</small>
+        </div>
+        <div class="p-cluster">
+          <span class="p-pill" id="queuePill">—</span>
+          <span class="p-dot" id="dot"></span>
+          <button class="p-round" id="btnMore" type="button" aria-label="আরও অপশন" aria-expanded="false">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="12" cy="19" r="1.7"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <main class="p-body">
+        <section class="p-pane active" id="pane-chat" role="tabpanel" aria-label="চেট">
+          <div class="p-chat" id="chat"></div>
+        </section>
+
+        <section class="p-pane" id="pane-team" role="tabpanel" aria-label="দল">
+          <div class="p-card">
+            <h3>দল · বস · কর্মী</h3>
+            <div id="teamRows"></div>
+          </div>
+          <div class="p-card">
+            <h3>গ্রুপ</h3>
+            <div id="groupRows"></div>
+          </div>
+        </section>
+
+        <section class="p-pane" id="pane-notes" role="tabpanel" aria-label="নোট">
+          <div class="p-card">
+            <h3 id="notesHead">নোট ও শেখা পাঠ</h3>
+            <div id="noteRows"></div>
+          </div>
+          <div class="p-card">
+            <h3>শেখা পাঠ</h3>
+            <div id="lessonRows"></div>
+          </div>
+        </section>
+
+        <section class="p-pane" id="pane-screen" role="tabpanel" aria-label="স্ক্রিন">
+          <div class="p-card">
+            <h3>PC-র লাইভ স্ক্রিন</h3>
+            <div class="p-shot" id="pcShot">
+              <img id="pcImg" alt="PC স্ক্রিন" />
+              <span class="stamp" id="pcStamp">তাজা হচ্ছে…</span>
+              <span class="spin">স্ক্রিন তোলা হচ্ছে…</span>
+            </div>
+            <div class="p-row" style="border-top: 0">
+              <button class="p-btn" id="btnPcRefresh" type="button">তাজা করো</button>
+              <button class="p-btn" id="btnPcAuto" type="button">অটো</button>
+              <button class="p-btn" id="btnBrowser" type="button">ব্রাউজার ট্যাব</button>
+              <span class="tag" id="pcAsk">টেপ করলেই নতুন ছবি</span>
+            </div>
+          </div>
+          <div class="p-card">
+            <h3>আপনার ফোনের স্ক্রিন</h3>
+            <div class="p-row">
+              <span class="grow"><span class="t" id="shareState">স্ক্রিন পাঠানো হয়নি</span><span class="s" id="shareHelp">ফোন ধরে Power + Volume down চাপুন, তারপর নিচের বোতামে নতুন ছবিটি বাছুন</span></span>
+            </div>
+            <div class="p-grid">
+              <button class="p-btn" id="btnShot" type="button">📸 স্ক্রিনশট পাঠাও</button>
+              <button class="p-btn" id="btnShare" type="button">লাইভ শেয়ার</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="p-pane" id="pane-files" role="tabpanel" aria-label="ফাইল">
+          <div class="p-card">
+            <h3>workspace ফাইল</h3>
+            <div class="p-row" style="border-top: 0">
+              <span class="tag" id="filesHead">—</span>
+              <span class="grow"></span>
+              <button class="p-btn" id="btnFilesRefresh" type="button">তাজা করো</button>
+            </div>
+            <div id="fileRows"></div>
+          </div>
+        </section>
+      </main>
+
+      <div class="p-hint" id="hint"></div>
+
+      <div class="p-input">
+        <input id="text" autocomplete="off" placeholder="এজেন্টকে বলো…" enterkeyhint="send" />
+        <button class="p-round" id="btnSend" type="button" aria-label="পাঠাও">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h13"/><path d="M12 5l7 7-7 7"/></svg>
+        </button>
+        <button class="p-round mic" id="mic" type="button" aria-label="ভয়েস">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>
+        </button>
+      </div>
+
+      <nav class="p-tabs" role="tablist">
+        <button class="p-tab active" type="button" data-tab="chat" role="tab">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-8 8H7l-3 3V12a8 8 0 0 1 8-8h1a8 8 0 0 1 8 8Z"/></svg>
+          চেট
+        </button>
+        <button class="p-tab" type="button" data-tab="team" role="tab">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><circle cx="17.5" cy="9.5" r="2.2"/><path d="M15 20a4.6 4.6 0 0 1 7-3.9"/></svg>
+          দল
+        </button>
+        <button class="p-tab" type="button" data-tab="notes" role="tab">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v5h4"/><path d="M9 12h7M9 16h5"/></svg>
+          নোট
+        </button>
+        <button class="p-tab" type="button" data-tab="screen" role="tab">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          স্ক্রিন
+        </button>
+        <button class="p-tab" type="button" data-tab="files" role="tab">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          ফাইল
+        </button>
+      </nav>
+    </div>
+
+    <div class="p-scrim" id="scrim"></div>
+    <div class="p-sheet" id="sheet" role="dialog" aria-label="অপশন">
+      <div class="grab"></div>
+      <div id="sheetRows"></div>
+    </div>
+    <div class="p-toast" id="toast"></div>
+    <video id="cam" playsinline muted></video>
+    <input id="shot" type="file" accept="image/*" hidden />
+
+    <script src="/phone.js"></script>
+  </body>
+</html>

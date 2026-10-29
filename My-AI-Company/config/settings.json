@@ -1,0 +1,58 @@
+{
+  "dashboard": { "host": "127.0.0.1", "port": 8088 },
+  "browser": {
+    "headless": false,
+    "channel": "msedge",
+    "viewport": { "width": 1400, "height": 900 },
+    "storage_state": "memory/logs/.browser_state.json"
+  },
+  "timeouts": {
+    "page_load_ms": 45000,
+    "selector_ms": 20000,
+    "api_fetch_total_s": 120,
+    "per_provider_s": 60,
+    "worker_retry_delay_s": 1.0
+  },
+  "limits": {
+    "max_worker_failures": 2,
+    "max_retries_per_worker": 2
+  },
+  "cache": {
+    "never_cache_actions": ["delete", "remove", "move", "rename", "clear", "purge"],
+    "ttl_s": 21600
+  },
+  "providers": {
+    "gemini": {
+      "url": "https://gemini.google.com/app",
+      "prompt_selectors": [
+        "div.ql-editor[contenteditable=true]",
+        "rich-textarea div[contenteditable=true]"
+      ],
+      "submit_strategy": "enter",
+      "response_selectors": [
+        "model-response .markdown",
+        "message-content",
+        "model-response"
+      ]
+    },
+    "deepseek": {
+      "url": "https://chat.deepseek.com/",
+      "prompt_selectors": ["textarea#chat-input", "textarea"],
+      "submit_strategy": "enter",
+      "response_selectors": ["div.markdown", ".ds-markdown", "message-content"]
+    },
+    "chatgpt": {
+      "url": "https://chatgpt.com/",
+      "prompt_selectors": ["#prompt-textarea", "textarea[data-id=root]"],
+      "submit_strategy": "enter",
+      "response_selectors": [
+        "[data-message-author-role=assistant] .markdown",
+        ".markdown"
+      ]
+    }
+  },
+  "prompts": {
+    "json_instruction": "Answer ONLY with a valid JSON object. No markdown fences, no prose around it.",
+    "worker_retry_hint": "Your previous reply was not valid JSON. Reply again with ONLY a valid JSON object."
+  }
+}

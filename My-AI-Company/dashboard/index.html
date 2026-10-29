@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My AI Company — Command Center</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/reactflow@11.11.4/dist/umd/index.js"></script>
+  <style>
+    :root {
+      --accent: #a8c8ff;
+      --glass-bg: rgba(255, 255, 255, 0.055);
+      --glass-border: rgba(255, 255, 255, 0.13);
+    }
+    * { box-sizing: border-box; }
+    html, body, #root { height: 100%; margin: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: radial-gradient(1200px 700px at 75% -10%, rgba(168,200,255,.14), transparent 55%),
+                  radial-gradient(900px 600px at -10% 110%, rgba(120,140,255,.10), transparent 55%),
+                  #05070d;
+      color: #dbe9ff;
+      overflow: hidden;
+    }
+
+    .glass {
+      background: var(--glass-bg);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      box-shadow: 0 10px 34px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.07);
+    }
+
+    .agent-node {
+      width: 190px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 8px 26px rgba(0,0,0,.45);
+      transition: box-shadow .25s ease, border-color .25s ease;
+    }
+    .agent-node .dot {
+      width: 9px; height: 9px; border-radius: 50%;
+      background: #5b6b84;
+      box-shadow: 0 0 0 0 rgba(91,107,132,0);
+      margin-right: 8px; flex: none;
+    }
+    .agent-node.online { border-color: rgba(74,222,128,.35); }
+    .agent-node.online .dot {
+      background: #4ade80;
+      box-shadow: 0 0 12px 3px rgba(74,222,128,.65);
+    }
+    .agent-node.busy { border-color: rgba(250,204,21,.4); }
+    .agent-node.busy .dot {
+      background: #facc15;
+      animation: pulse 1s ease-in-out infinite;
+    }
+    .agent-node.error { border-color: rgba(248,113,113,.55); }
+    .agent-node.error .dot {
+      background: #f87171;
+      box-shadow: 0 0 12px 3px rgba(248,113,113,.7);
+    }
+    .agent-node.ceo {
+      border-color: rgba(168,200,255,.55);
+      box-shadow: 0 0 34px rgba(168,200,255,.18), 0 8px 26px rgba(0,0,0,.45);
+    }
+    .agent-node.ceo .dot {
+      background: var(--accent);
+      box-shadow: 0 0 14px 4px rgba(168,200,255,.8);
+    }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 6px 2px rgba(250,204,21,.35); }
+      50% { box-shadow: 0 0 16px 6px rgba(250,204,21,.75); }
+    }
+
+    .react-flow__edge-path { stroke-width: 1.6; }
+    .react-flow__edge.animated path { stroke-dasharray: 6 4; }
+    .react-flow__controls {
+      box-shadow: none; border-radius: 10px; overflow: hidden;
+      background: rgba(10,14,24,.8); border: 1px solid var(--glass-border);
+    }
+    .react-flow__controls button {
+      background: transparent; border-bottom: 1px solid var(--glass-border);
+      color: #dbe9ff;
+    }
+    .react-flow__attribution { background: transparent; color: #2c3a52; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script src="app.js"></script>
+</body>
+</html>

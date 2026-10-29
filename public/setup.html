@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>PC Agent · সংযোগ</title>
+<style>
+  :root{
+    --bg:#060b12; --ink:#e6f1ff; --muted:#8ba3bb; --line:rgba(120,200,255,.16);
+    --glass:rgba(255,255,255,.045); --blue:#3fa7ff; --blue-soft:rgba(63,167,255,.14);
+    --ok:#41d39b; --warn:#ffbe4d;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;min-height:100vh;color:var(--ink);
+    font-family:"Segoe UI",system-ui,-apple-system,"Noto Sans Bengali",sans-serif;
+    background:
+      radial-gradient(900px 600px at 12% -10%, rgba(47,140,255,.18), transparent 60%),
+      radial-gradient(700px 500px at 105% 10%, rgba(47,140,255,.10), transparent 60%),
+      var(--bg);
+    display:flex;align-items:center;justify-content:center;padding:clamp(18px,4vw,48px)
+  }
+  main{width:min(1020px,100%);display:flex;flex-direction:column;gap:22px}
+  header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  h1{font-size:clamp(20px,2.4vw,26px);margin:0;letter-spacing:.02em;font-weight:600}
+  .sub{margin:6px 0 0;color:var(--muted);font-size:14px;line-height:1.6;max-width:62ch}
+  .badge{
+    display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;
+    border:1px solid var(--line);background:var(--glass);font-size:13px;color:var(--muted)
+  }
+  .badge i{width:8px;height:8px;border-radius:50%;background:var(--warn);display:inline-block}
+  .badge.ready i{background:var(--ok);box-shadow:0 0 12px rgba(65,211,155,.7)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+  .card{
+    position:relative;border:1px solid var(--line);border-radius:20px;padding:18px 18px 16px;
+    background:linear-gradient(160deg,rgba(255,255,255,.06),rgba(255,255,255,.02));
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    box-shadow:0 16px 40px rgba(0,0,0,.35);
+    display:flex;flex-direction:column;gap:8px;transition:border-color .25s,transform .25s
+  }
+  .card.wide{grid-column:1/-1;flex-direction:row;align-items:center;gap:18px;flex-wrap:wrap}
+  .left{display:flex;flex-direction:column;gap:6px}
+  .card.wide .left{flex:1 1 420px}
+  .card.wide .row{margin-left:auto}
+  .card.on{border-color:rgba(65,211,155,.4)}
+  .top{display:flex;align-items:center;gap:10px}
+  .dot{width:9px;height:9px;border-radius:50%;background:#5c7288;flex:0 0 auto}
+  .card.on .dot{background:var(--ok);box-shadow:0 0 12px rgba(65,211,155,.8)}
+  .card.busy .dot{background:var(--blue);animation:pulse 1.2s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:.35}50%{opacity:1}}
+  .name{font-size:16px;font-weight:600}
+  .state{font-size:13px;color:var(--muted);line-height:1.55}
+  .card.on .state{color:#9be6c7}
+  .row{margin-top:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  button{
+    font:inherit;font-size:14px;border-radius:12px;padding:10px 16px;cursor:pointer;
+    border:1px solid var(--line);background:var(--glass);color:var(--ink);transition:.2s
+  }
+  button:hover{border-color:rgba(63,167,255,.5);background:var(--blue-soft)}
+  button.primary{background:var(--blue);border-color:var(--blue);color:#04121f;font-weight:700}
+  button.primary:hover{background:#5cb7ff}
+  button:disabled{opacity:.45;cursor:default}
+  button.link{padding:6px 10px;font-size:13px;color:var(--muted)}
+  .meta{font-size:12px;color:var(--muted);font-family:ui-monospace,Consolas,monospace}
+  .note{font-size:12.5px;color:var(--muted);line-height:1.5}
+  footer{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;padding-top:4px}
+  .hint{font-size:12.5px;color:var(--muted);line-height:1.6;max-width:64ch}
+  .spin{width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,.2);border-top-color:var(--blue);animation:rot .8s linear infinite;display:inline-block;vertical-align:-2px}
+  @keyframes rot{to{transform:rotate(360deg)}}
+  .mode-note{
+    margin:0;display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px;color:var(--warn);
+    border:1px solid rgba(255,190,77,.28);background:rgba(255,190,77,.07);border-radius:14px;padding:10px 14px
+  }
+  .mode-note[hidden]{display:none}
+  @media (max-width:560px){
+    body{padding:16px}
+    .card{padding:16px;border-radius:16px}
+    .card.wide{flex-direction:column;align-items:stretch}
+    .card.wide .row{margin-left:0}
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1>সংযোগ</h1>
+      <p class="sub">প্রতিটি সাইটে <b>একবার</b> হাতে লগইন করো — সেশন এই পিসিতে থেকে যায়। এরপর এজেন্ট নিজেই হিডেন ব্রাউজারে কাজ করবে, আর কোনো সেটআপ বা API কী লাগবে না।</p>
+    </div>
+    <span class="badge" id="badge"><i></i><span id="badgeText">যাচাই হচ্ছে…</span></span>
+  </header>
+
+  <p class="mode-note" id="modeNote" hidden>
+    <span>পথ এখন “শুধু API” — লগইন করা ওয়েব AI ব্যবহার করতে “দুটোই” দরকার।</span>
+    <button class="link" id="modeFix" type="button">দুটোই করো</button>
+  </p>
+
+  <section class="grid" id="grid"></section>
+
+  <footer>
+    <span class="hint" id="hint">টেরাবক্সে লগইন করলেই ডেটা-লেন কানেক্ট হয়ে যায় — AList বা টোকেন আর লাগবে না। পাসওয়ার্ড কোথাও লেখা বা পাঠানো হয় না।</span>
+    <div class="row">
+      <button class="link" id="recheck" type="button">সব আবার যাচাই</button>
+      <button class="primary" id="go" type="button" disabled>ড্যাশবোর্ডে যাও</button>
+    </div>
+  </footer>
+</main>
+
+<script>
+const PROVIDERS = [
+  { key: 'gemini', name: 'Gemini', note: 'গবেষণা, ফাইল/ছবি দেখা, লম্বা লেখা' },
+  { key: 'chatgpt', name: 'ChatGPT', note: 'রাউটার ও বস-দের মূল কাজ' },
+  { key: 'deepseek', name: 'DeepSeek', note: 'বিশ্লেষণ ও কোড' },
+  { key: 'duckai', name: 'Duck.ai', note: 'ডিফল্টে লগইন ছাড়াই চলে' }
+];
+
+const grid = document.getElementById('grid');
+const badge = document.getElementById('badge');
+const badgeText = document.getElementById('badgeText');
+const go = document.getElementById('go');
+const cards = new Map();
+let state = { providers: {}, terabox: {} };
+let routeMode = 'both';
+let polling = null;
+
+function el(tag, cls, text) {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text != null) n.textContent = text;
+  return n;
+}
+
+function buildCard({ key, name, note, wide }) {
+  const card = el('article', 'card' + (wide ? ' wide' : ''));
+  const top = el('div', 'top');
+  top.append(el('span', 'dot'), el('span', 'name', name));
+  const stateLine = el('p', 'state', 'যাচাই হয়নি');
+  const meta = el('div', 'meta', '');
+  const row = el('div', 'row');
+  const loginBtn = el('button', 'primary', 'লগইন করো');
+  const checkBtn = el('button', '', 'যাচাই');
+  row.append(loginBtn, checkBtn);
+  const left = el('div', 'left');
+  left.append(top, stateLine);
+  if (note) left.append(el('div', 'note', note));
+  left.append(meta);
+  card.append(left, row);
+  grid.append(card);
+  const entry = { card, stateLine, meta, loginBtn, checkBtn };
+  cards.set(key, entry);
+
+  loginBtn.addEventListener('click', async () => {
+    loginBtn.disabled = true;
+    stateLine.textContent = 'উইন্ডো খুলছে…';
+    try {
+      const r = await fetch('/api/connect/login', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ target: key })
+      });
+      const data = await r.json();
+      if (!r.ok || data.ok === false) throw new Error(data.error || 'খোলা যায়নি');
+      stateLine.textContent = key === 'terabox'
+        ? 'ব্রাউজারে টেরাবক্সে লগইন করো — শেষ হলে এই কার্ড নিজেই সবুজ হবে'
+        : 'ব্রাউজারে লগইন করো — শেষ হলে এই কার্ড নিজেই সবুজ হবে';
+      startPoll();
+    } catch (err) {
+      stateLine.textContent = err.message;
+      loginBtn.disabled = false;
+    }
+  });
+  checkBtn.addEventListener('click', () => runCheck(key));
+  return entry;
+}
+
+for (const p of PROVIDERS) buildCard(p);
+buildCard({
+  key: 'terabox',
+  name: 'Terabox',
+  note: 'লগইন করলেই ডেটা-লেন কানেক্ট — AList/টোকেন ছাড়া',
+  wide: true
+});
+
+function paint() {
+  for (const [key, entry] of cards) {
+    const info = key === 'terabox' ? state.terabox : state.providers[key];
+    const on = Boolean(info && info.ok);
+    entry.card.classList.toggle('on', on);
+    entry.card.classList.toggle('busy', Boolean(info && info.busy));
+    if (!info || (!on && !info.busy)) entry.stateLine.textContent = (info && info.note) || 'লগইন দরকার';
+    else if (info.busy) entry.stateLine.textContent = 'লগইনের অপেক্ষায় — উইন্ডোতে লগইন শেষ করো';
+    else entry.stateLine.textContent = 'সংযুক্ত — কাজের জন্য প্রস্তুত';
+    entry.loginBtn.textContent = on ? 'আবার লগইন' : 'লগইন করো';
+    entry.loginBtn.disabled = Boolean(info && info.busy);
+    if (key === 'terabox') {
+      entry.meta.textContent = on
+        ? `${info.root || ''}${info.files && info.files.length ? ' · ' + info.files.length + ' ফাইল' : ''}`
+        : '';
+    } else {
+      entry.meta.textContent = on && info.at ? `শেষ যাচাই: ${new Date(info.at).toLocaleTimeString('bn-BD')}` : '';
+    }
+  }
+  const ready = Object.values(state.providers || {}).some((p) => p.ok);
+  badge.classList.toggle('ready', ready);
+  badgeText.textContent = ready ? 'একটি সাইট প্রস্তুত' : 'লগইন বাকি';
+  go.disabled = !ready;
+  document.getElementById('modeNote').hidden = routeMode !== 'api';
+}
+
+async function load() {
+  const r = await fetch('/api/connect');
+  const data = await r.json();
+  state = { providers: data.providers || {}, terabox: data.terabox || {} };
+  routeMode = data.routeMode || 'both';
+  paint();
+  if (Object.values(state.providers).some((p) => p.busy) || state.terabox.busy) startPoll();
+}
+
+async function runCheck(target) {
+  const entry = target === 'terabox' ? cards.get('terabox') : cards.get(target);
+  if (entry) {
+    entry.stateLine.textContent = 'যাচাই হচ্ছে…';
+    entry.checkBtn.disabled = true;
+  }
+  try {
+    const r = await fetch('/api/connect/check', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(target ? { target } : {})
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || 'যাচাই ব্যর্থ');
+    await load();
+  } catch (err) {
+    if (entry) entry.stateLine.textContent = err.message;
+  } finally {
+    if (entry) entry.checkBtn.disabled = false;
+  }
+}
+
+function startPoll() {
+  if (polling) return;
+  polling = setInterval(async () => {
+    try {
+      await load();
+    } catch {
+      /* ignore */
+    }
+  }, 4000);
+  setTimeout(() => {
+    clearInterval(polling);
+    polling = null;
+  }, 10 * 60_000);
+}
+
+document.getElementById('recheck').addEventListener('click', () => runCheck(''));
+document.getElementById('modeFix').addEventListener('click', async () => {
+  const btn = document.getElementById('modeFix');
+  btn.disabled = true;
+  try {
+    const r = await fetch('/api/connect/route', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ mode: 'both' })
+    });
+    const data = await r.json();
+    if (!r.ok || data.ok === false) throw new Error(data.error || 'বদলানো যায়নি');
+    routeMode = data.routeMode || 'both';
+    paint();
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = err.message;
+  }
+});
+document.getElementById('go').addEventListener('click', () => {
+  location.href = '/';
+});
+
+try {
+  const es = new EventSource('/api/events');
+  es.addEventListener('connect', (ev) => {
+    try {
+      const d = JSON.parse(ev.data);
+      state = { providers: d.providers || {}, terabox: d.terabox || {} };
+      paint();
+    } catch {
+      /* ignore */
+    }
+  });
+} catch {
+  /* SSE না চললেও পোলিং আছে */
+}
+
+load().catch((err) => {
+  badgeText.textContent = 'সার্ভারের সাথে কথা হচ্ছে না';
+  console.error(err);
+});
+</script>
+</body>
+</html>

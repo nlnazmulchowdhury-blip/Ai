@@ -1,0 +1,13 @@
+node_modules/
+profiles/
+workspace/
+data/
+models/
+tools/
+tmp-ref/
+.env
+*.log
+*.zip
+__pycache__/
+tmp-*
+training/out/

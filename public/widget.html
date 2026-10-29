@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="bn" translate="no">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Edge না-বলা পর্যন্ত বাংলা লেখা ইংরেজিতে পাল্টে ফেলত — হাট পুরোপুরি notranslate -->
+    <meta name="google" content="notranslate" />
+    <title>Agent Hat · এজেন্ট হাট</title>
+    <style>
+      :root {
+        --bg: #070708;
+        --line: rgba(255, 255, 255, 0.08);
+        --text: #eef1f4;
+        --muted: rgba(236, 241, 245, 0.62);
+        --dim: rgba(236, 241, 245, 0.38);
+        --blue: #a8c8ff;
+        --deck-blue: #5b9dff;
+        --deck-glow: rgba(91, 157, 255, 0.28);
+        --glass: rgba(255, 255, 255, 0.055);
+        --glass-strong: rgba(255, 255, 255, 0.085);
+        --glass-stroke: rgba(255, 255, 255, 0.1);
+        --glass-shadow: 0 20px 55px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+        --blur: blur(26px) saturate(140%);
+      }
+      * { box-sizing: border-box; }
+      html, body { height: 100%; margin: 0; }
+      body {
+        background: radial-gradient(120% 90% at 90% 100%, rgba(91, 157, 255, 0.16), transparent 60%), var(--bg);
+        color: var(--text);
+        font: 13.5px/1.55 "Segoe UI Variable Text", "Noto Sans Bengali", "Shonar Bangla", "Segoe UI", sans-serif;
+        overflow: hidden;
+        user-select: none;
+      }
+      ::-webkit-scrollbar { width: 0; height: 0; }
+      .hide { display: none !important; }
+
+      /* ---------- collapsed: Gemini-ধাঁচের কোণা পিল ---------- */
+      /* পুরো উইন্ডোটাই ক্লিক-এরিয়া; ভিজ্যুয়াল পিলটা নিচে বসে, ওপরে ড্র্যাগ-হ্যান্ডল */
+      .pill {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        padding: 0 10px 10px;
+        cursor: pointer;
+      }
+      .pill-handle {
+        flex: none;
+        width: 46px;
+        height: 4px;
+        margin: 0 auto 8px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.26);
+      }
+      .pill-bar {
+        position: relative;
+        flex: none;
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        height: 54px;
+        padding: 0 16px;
+        border-radius: 999px;
+        background: #1b1c1f;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      }
+      .pill.busy .pill-bar { animation: ring 1.1s ease-in-out infinite; }
+      @keyframes ring {
+        50% { box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 0 0 3px var(--deck-glow); }
+      }
+      /* ছবি কোণার দুটো ছোট ঘূর্ণায়মান আঁশ — তার নীলই রাখা হয়েছে */
+      .pill-arc {
+        position: absolute;
+        top: -3px;
+        width: 30px;
+        height: 26px;
+        border-top: 2.5px solid var(--deck-blue);
+        border-radius: 50%;
+        opacity: 0.9;
+        pointer-events: none;
+      }
+      .pill-arc.left { left: 1px; transform: rotate(-26deg); }
+      .pill-arc.right { right: 1px; transform: rotate(26deg); }
+      .pill-plus {
+        flex: none;
+        display: grid;
+        place-items: center;
+        width: 22px;
+        height: 22px;
+        color: rgba(255, 255, 255, 0.86);
+      }
+      .pill-text {
+        flex: 1;
+        min-width: 0;
+        font-size: 15px;
+        color: rgba(255, 255, 255, 0.9);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .pill-ico { flex: none; display: grid; place-items: center; width: 22px; height: 22px; color: rgba(255, 255, 255, 0.8); }
+      body[data-mode="collapsed"] {
+        background:
+          radial-gradient(130% 105% at 50% 120%, rgba(91, 157, 255, 0.1), transparent 62%),
+          linear-gradient(180deg, #060607 0%, #000 100%);
+      }
+
+      /* ---------- expanded panel ---------- */
+      .panel {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        border-radius: 20px;
+        background: var(--glass);
+        backdrop-filter: var(--blur);
+        -webkit-backdrop-filter: var(--blur);
+        overflow: hidden;
+      }
+      body[data-mode="collapsed"] .panel { display: none; }
+      body[data-mode="expanded"] .pill { display: none; }
+      .panel.reveal { animation: spring 0.34s cubic-bezier(0.22, 1.4, 0.5, 1); }
+      @keyframes spring {
+        from { transform: translateY(14px) scale(0.97); opacity: 0.2; }
+        to { transform: none; opacity: 1; }
+      }
+      .bar {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 9px 9px 9px 14px;
+        flex: none;
+      }
+      .bar-title { font-size: 12.5px; letter-spacing: 0.02em; color: var(--blue); }
+      .bar-sub { font-size: 11px; color: var(--dim); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .ib {
+        flex: none;
+        width: 27px;
+        height: 27px;
+        display: grid;
+        place-items: center;
+        border: 0;
+        border-radius: 50%;
+        background: transparent;
+        color: var(--muted);
+        font: inherit;
+        font-size: 13px;
+        cursor: pointer;
+      }
+      .ib[aria-pressed="true"] { background: var(--glass-strong); color: var(--blue); }
+
+      .thread {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        padding: 2px 15px 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+        overscroll-behavior: contain;
+      }
+      .ln { margin: 0; font-size: 13px; white-space: pre-wrap; overflow-wrap: anywhere; }
+      .ln.me { color: var(--blue); }
+      .ln.ai { color: var(--text); }
+      .ln.step { color: var(--dim); font-size: 11.5px; }
+      .ln.note { color: var(--dim); font-size: 11.5px; }
+      .thread .sample .ln.ai::before { content: ""; }
+
+      /* ---------- composer — কোণার পিলের একই ধাঁচের বার ---------- */
+      .comp {
+        flex: none;
+        padding: 8px 10px 12px;
+      }
+      .comp-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        height: 54px;
+        padding: 0 8px;
+        border-radius: 999px;
+        background: #1b1c1f;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      }
+      .comp-bar input {
+        flex: 1;
+        min-width: 0;
+        height: 100%;
+        border: 0;
+        background: transparent;
+        color: var(--text);
+        font: inherit;
+        font-size: 14.5px;
+        outline: none;
+      }
+      .comp-bar input::placeholder { color: rgba(255, 255, 255, 0.42); }
+      /* ---------- সংযুক্তি — ছবি/ভিডিও এজেন্টকে দেওয়ার বোতাম + চিপ ---------- */
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 0 6px 8px;
+      }
+      .chip {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        max-width: 100%;
+        padding: 5px 6px 5px 10px;
+        border-radius: 999px;
+        background: #1b1c1f;
+        font-size: 11.5px;
+        color: rgba(255, 255, 255, 0.78);
+      }
+      .chip i { font-style: normal; color: var(--blue); font-weight: 600; }
+      .chip span {
+        max-width: 180px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .chip em { font-style: normal; color: rgba(255, 255, 255, 0.4); }
+      .chip button {
+        border: 0;
+        background: transparent;
+        color: rgba(255, 255, 255, 0.45);
+        font-size: 15px;
+        line-height: 1;
+        cursor: pointer;
+      }
+      .chip button:hover { color: var(--blue); }
+      .comp-ico {
+        flex: none;
+        width: 34px;
+        height: 34px;
+        display: grid;
+        place-items: center;
+        border: 0;
+        border-radius: 50%;
+        background: transparent;
+        color: rgba(255, 255, 255, 0.82);
+        cursor: pointer;
+      }
+      .comp-ico:hover { background: rgba(255, 255, 255, 0.08); }
+      /* মাইক যেন না নাড়ে — ওয়েভফর্মের স্লটটাও পাঠাও-র সমান চওড়া */
+      .comp-wave { width: 60px; border-radius: 999px; }
+      .mic.on { background: rgba(91, 157, 255, 0.22); color: var(--blue); }
+      .comp-clip.on { background: rgba(91, 157, 255, 0.22); color: var(--blue); }
+      /* স্ক্রিনে ঘেরো — লেবেলা বোতাম, চাপ দিলেই পুরো ডেস্কটপের সিলেক্ট ওভারলে ওঠে */
+      .snip-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0 2px 8px;
+      }
+      .snip-go {
+        flex: none;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        height: 28px;
+        padding: 0 11px;
+        border: 0;
+        border-radius: 999px;
+        background: rgba(91, 157, 255, 0.16);
+        color: var(--blue);
+        font: inherit;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .snip-go:hover { background: rgba(91, 157, 255, 0.28); }
+      .snip-go.on { background: rgba(91, 157, 255, 0.34); }
+      .snip-tip { font-size: 10.5px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .mic.on ~ .comp-wave { color: var(--blue); animation: sway 1s ease-in-out infinite; }
+      @keyframes sway { 50% { transform: scaleY(1.4); } }
+
+      /* ---------- ভয়েস মোড — পুরো কোণা জুড়ে অস্বচ্ছ স্ক্রিন, পেছনের কিছুই দেখাবে না ---------- */
+      .voice {
+        position: absolute;
+        inset: 0;
+        z-index: 3;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 26px;
+        padding: 26px 18px 30px;
+        background: radial-gradient(120% 80% at 50% 100%, rgba(91, 157, 255, 0.16), transparent 62%), #05060a;
+      }
+      body[data-voice="on"] .voice { display: flex; }
+      .voice-orb {
+        width: 132px;
+        height: 182px;
+        border-radius: 50%;
+        background: linear-gradient(180deg, #0a0f1c 0%, #24406e 46%, #b9d4ff 100%);
+        box-shadow: 0 0 70px rgba(91, 157, 255, 0.28);
+        filter: blur(1.5px);
+        animation: breathe 3.4s ease-in-out infinite;
+      }
+      body[data-listening="1"] .voice-orb { animation-duration: 1.1s; }
+      /* উত্তর বলা অবস্থায় অরবটা স্পষ্টভাবে আলাদা — শুনছে না, বলছে */
+      body[data-speaking="1"] .voice-orb {
+        animation-duration: 0.55s;
+        background: linear-gradient(180deg, #0a0f1c 0%, #3d64a6 46%, #e2eeff 100%);
+        box-shadow: 0 0 110px rgba(91, 157, 255, 0.5);
+      }
+      @keyframes breathe {
+        50% { transform: scale(1.06) translateY(-4px); }
+      }
+      .voice-say {
+        margin: 0;
+        min-height: 20px;
+        max-width: 300px;
+        text-align: center;
+        font-size: 14px;
+        color: var(--muted);
+        overflow-wrap: anywhere;
+      }
+      .voice-row { display: flex; align-items: center; gap: 14px; }
+      .rb {
+        width: 46px;
+        height: 46px;
+        display: grid;
+        place-items: center;
+        border: 1px solid var(--glass-stroke);
+        border-radius: 50%;
+        background: #16181c;
+        color: rgba(255, 255, 255, 0.86);
+        font: inherit;
+        font-size: 15px;
+        cursor: pointer;
+      }
+      .rb:hover { background: #1e2126; }
+      .rb.on { background: rgba(91, 157, 255, 0.22); border-color: transparent; color: var(--blue); }
+      .go {
+        flex: none;
+        height: 38px;
+        padding: 0 16px;
+        border: 0;
+        border-radius: 999px;
+        background: var(--deck-blue);
+        color: #05070c;
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .go:disabled { opacity: 0.45; }
+      /* একই স্লটে দুটো — ইনপুটে লেখা (বা চলমান কাজ) থাকলে পাঠাও, না হলে মাক করা ওয়েভফর্ম */
+      .comp-bar .go { display: none; }
+      .comp-bar.typing .go { display: block; }
+      .comp-bar.typing .comp-wave { display: none; }
+
+      /* ---------- দেখাও মোড — স্ক্রিন থেকে ঘেরা/ছোঁয়া/উইন্ডো বেছে বোঝানো ---------- */
+      .show {
+        position: absolute;
+        inset: 0;
+        z-index: 3;
+        display: none;
+        flex-direction: column;
+        gap: 8px;
+        padding: 10px 10px 12px;
+        background: radial-gradient(120% 80% at 50% 100%, rgba(91, 157, 255, 0.14), transparent 62%), #05060a;
+      }
+      body[data-show="on"] .show { display: flex; }
+      .show-bar { display: flex; align-items: center; gap: 6px; }
+      .show-title { flex: 1; font-size: 12.5px; color: var(--muted); }
+      .rb.sm { width: 30px; height: 30px; font-size: 13px; }
+      .rb.wide { width: auto; padding: 0 11px; border-radius: 999px; font-size: 11.5px; }
+      .shot {
+        position: relative;
+        flex: 1;
+        min-height: 0;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #0d0f13;
+        cursor: crosshair;
+      }
+      .shot img {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: fill;
+        -webkit-user-drag: none;
+        user-select: none;
+      }
+      .shot-box {
+        position: absolute;
+        border: 1.5px solid var(--deck-blue);
+        background: rgba(91, 157, 255, 0.16);
+        pointer-events: none;
+      }
+      .shot-dot {
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        margin: -6px 0 0 -6px;
+        border-radius: 50%;
+        border: 2px solid var(--deck-blue);
+        background: rgba(91, 157, 255, 0.5);
+        pointer-events: none;
+      }
+      .show-tools { display: flex; gap: 6px; }
+      .st {
+        flex: 1;
+        height: 32px;
+        border: 1px solid var(--glass-stroke);
+        border-radius: 999px;
+        background: #16181c;
+        color: rgba(255, 255, 255, 0.8);
+        font: inherit;
+        font-size: 12px;
+        cursor: pointer;
+      }
+      .st.on { background: rgba(91, 157, 255, 0.22); border-color: transparent; color: var(--blue); }
+      .show-hint { margin: 0; min-height: 16px; font-size: 11px; color: var(--dim); }
+    </style>
+  </head>
+  <body data-mode="expanded">
+    <div class="pill" id="pill" role="button" tabindex="0" title="খুলে কাজ বলো">
+      <span class="pill-handle"></span>
+      <div class="pill-bar">
+        <span class="pill-arc left"></span>
+        <span class="pill-arc right"></span>
+        <span class="pill-plus" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 5v14M5 12h14" /></svg>
+        </span>
+        <span class="pill-text" id="pill-text">জিজ্ঞেস করো…</span>
+        <span class="pill-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3" /><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18.5V21" /></svg>
+        </span>
+        <span class="pill-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 10v4M8 6.5v11M12 9.5v5M16 4.5v15M20 10.5v3" /></svg>
+        </span>
+      </div>
+    </div>
+
+    <section class="panel reveal" id="panel" aria-label="এজেন্ট হাট">
+      <header class="bar">
+        <span class="bar-title">হাট</span>
+        <span class="bar-sub" id="sub">প্রস্তুত</span>
+        <button class="ib" id="btn-voice" type="button" title="কথোত্তর শোনাও">🔊</button>
+        <button class="ib" id="btn-clear" type="button" title="নতুন চেট — আগেরটা ইতিহাসে জমা থাকে">⟳</button>
+        <button class="ib" id="btn-min" type="button" title="ছোট করো">▾</button>
+        <button class="ib" id="btn-close" type="button" title="হাট বন্ধ করো">✕</button>
+      </header>
+
+      <div class="thread" id="thread"></div>
+
+      <footer class="comp">
+        <div class="chips" id="chips" hidden></div>
+        <!-- স্ক্রিন থেকে ঘেরো — কম্পোজারের ঠিক উপরে, এক নজরে চোখে পড়ে -->
+        <div class="snip-row">
+          <button class="snip-go" id="btn-snip" type="button" title="পুরো স্ক্রিনে ঘেরো — টানলে অংশ, ক্লিকে পুরো উইন্ডো, Shift+ক্লিকে বিন্দু">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M6 2v16h16" />
+              <path d="M2 6h4M2 10h4M10 2v4M14 2v4" />
+              <path d="M22 12l-10 10" />
+            </svg>
+            <span>স্ক্রিনে ঘেরো</span>
+          </button>
+          <span class="snip-tip">টানলে অংশ · ক্লিকে পুরো উইন্ডো</span>
+        </div>
+        <div class="comp-bar" id="comp-bar">
+          <button class="comp-ico comp-clip" id="btn-clip" type="button" title="ছবি / ভিডিও দাও" aria-label="ছবি বা ভিডিও এজেন্টকে দিন">
+            <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" /></svg>
+          </button>
+          <input id="file-in" type="file" accept="image/*,video/*" multiple hidden />
+          <button class="comp-ico comp-show" id="btn-show" type="button" title="স্ক্রিনের ছবি / লাইভ দেখাও" aria-label="স্ক্রিন থেকে দেখিয়ে বোঝাও">
+            <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12S6 6.2 12 6.2 21.5 12 21.5 12 18 17.8 12 17.8 2.5 12 2.5 12z" /><circle cx="12" cy="12" r="2.7" /></svg>
+          </button>
+          <input id="input" type="text" placeholder="কী কাজ করবে বলো…" spellcheck="false" autocomplete="off" />
+          <button class="comp-ico mic" id="btn-mic" type="button" title="বলো">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3" /><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18.5V21" /></svg>
+          </button>
+          <button class="comp-ico comp-wave" id="btn-wave" type="button" title="ভয়েস মোড খোলো">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 10v4M8 6.5v11M12 9.5v5M16 4.5v15M20 10.5v3" /></svg>
+          </button>
+          <button class="go" id="btn-send" type="button">পাঠাও</button>
+        </div>
+      </footer>
+
+      <section class="voice" id="voice" aria-label="ভয়েস মোড">
+        <div class="voice-orb"></div>
+        <p class="voice-say" id="voice-say">বলো…</p>
+        <div class="voice-row">
+          <button class="rb" id="v-close" type="button" title="বন্ধ করো">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+          </button>
+          <button class="rb" id="v-mic" type="button" title="আবার বলো">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3" /><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18.5V21" /></svg>
+          </button>
+          <button class="rb" id="v-voice" type="button" title="কথোত্তর শোনাও">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6.5 8.5H4v7h2.5L11 19z" /><path d="M15 9.5a3.5 3.5 0 0 1 0 5" /></svg>
+          </button>
+        </div>
+      </section>
+
+      <section class="show" id="show" aria-label="দেখানো মোড">
+        <div class="show-bar">
+          <span class="show-title">দেখাও — কোনটা বলছি</span>
+          <button class="rb sm" id="s-refresh" type="button" title="নতুন স্ক্রিন তোলো">⟳</button>
+          <button class="rb sm wide" id="s-live" type="button" title="এজেন্ট যখন খুশি তাজা স্ক্রিন দেখতে পাবে">লাইভ</button>
+          <button class="rb sm" id="s-close" type="button" title="বন্ধ করো">✕</button>
+        </div>
+        <div class="shot" id="shot">
+          <img id="shot-img" alt="স্ক্রিনের ছবি" draggable="false" />
+          <div class="shot-box" id="shot-box" hidden></div>
+          <div class="shot-dot" id="shot-dot" hidden></div>
+        </div>
+        <div class="show-tools">
+          <button class="st on" id="t-region" type="button" title="পুরো স্ক্রিনে টেনে ঘেরো">স্ক্রিনে ঘেরো</button>
+          <button class="st" id="t-point" type="button" title="স্ক্রিনে যে জায়গাটা বলছো চাপ দাও">বিন্দু</button>
+          <button class="st" id="t-win" type="button" title="স্ক্রিনে উইন্ডোতে চাপ দাও">উইন্ডো</button>
+          <button class="st" id="t-full" type="button" title="পুরো স্ক্রিন পাঠাও">পুরো</button>
+        </div>
+        <p class="show-hint" id="show-hint">প্রথমে পুরো স্ক্রিন জুড়ে ঘেরো — হ্যাটের ছবিতে নয়</p>
+      </section>
+    </section>
+
+    <script src="/widget.js"></script>
+  </body>
+</html>

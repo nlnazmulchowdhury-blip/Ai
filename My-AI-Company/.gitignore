@@ -1,0 +1,6 @@
+# Never commit browser state (contains logged-in session cookies)
+memory/logs/
+memory/.browser_state.json
+__pycache__/
+*.pyc
+workspace/
